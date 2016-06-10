@@ -118,8 +118,13 @@
 
              user: {
                  type: Object,
-                 value: null
-             }
+                 value: null,
+             },
+
+             userPublic: {
+                 type: Object,
+                 value: null,
+             },
 
          },
 
@@ -128,6 +133,10 @@
          observers: [
              '_dataChanged(data)'
          ],
+
+         _log: function (data) {
+             console.log(data);
+         },
 
          _dataChanged: function (data) {
              // console.log(data);
@@ -141,6 +150,8 @@
              /* this.push('data', newTheorem);*/
              firebase.app('fss-data').database().ref('/theorems').push(newTheorem);
              this.set('query', '');
+
+             this.set('publicData.contributions', this.publicData.contributions ? this.publicData.contributions + 1 : 1);
          },
 
          addUse: function (event) {
@@ -203,10 +214,7 @@
              }
          },
 
-         canAdd: function (user) {
-             console.log(user);
-         }
-     })
+     });
     </script>
 
 </dom-module>

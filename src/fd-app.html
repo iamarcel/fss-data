@@ -77,6 +77,13 @@
             on-login="onFirebaseLogin">
         </firebase-auth>
 
+        <firebase-document
+            id="firebase-publicdata"
+            app-name="fss-data"
+            path="/users-public/{{user.uid}}"
+            data="{{myPublicData}}">
+        </firebase-document>
+
         <app-location route="{{route}}" url-space-regex="!(^/__)"></app-location>
         <app-route
             route="{{route}}"
@@ -105,9 +112,8 @@
                 </iron-collapse>
 
                 <paper-menu selected="[[page]]" attr-for-selected="to-page" class="drawer-list" role="navigation">
-                    <paper-item on-tap="routeTo" to-page="list">
-                        Stellingen
-                    </paper-item>
+                    <paper-item on-tap="routeTo" to-page="list">Stellingen</paper-item>
+                    <paper-item on-tap="routeTo" to-page="leaderboard">Leaderboard</paper-item>
                 </paper-menu>
                 <template is="dom-if" if="[[!user]]">
                     <div class="text-center">
@@ -133,7 +139,8 @@
                 </app-header>
 
                 <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-                    <fd-list name="list" user="[[user]]"></fd-list>
+                    <fd-list name="list" user="[[user]]" user-public="{{myPublicData}}"></fd-list>
+                    <fd-leaderboard name="leaderboard"></fd-list>
                 </iron-pages>
 
             </app-header-layout>
@@ -175,8 +182,24 @@
                  this.resolveUrl('fd-' + page + '.html'), null, null, true);
          },
 
+         _log: function (data) {
+             console.log(data);
+         },
+
          _userChanged: function (user) {
-             // console.log(user);
+             if (this.signedIn && user) {
+                 // Update my public data
+                 if (!this.myPublicData) {
+                     this.myPublicData = {};
+                 }
+                 this.set('myPublicData.name', user.displayName);
+                 this.set('myPublicData.photoURL', user.photoURL);
+                 if (!this.myPublicData.contributions) {
+                     this.set('myPublicData.contributions', 0);
+                 }
+
+                 this.$['firebase-publicdata'].save('/users-public', user.uid);
+             }
          },
 
          routeTo: function (event) {

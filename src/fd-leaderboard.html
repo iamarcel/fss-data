@@ -1,0 +1,39 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+
+<dom-module id="fd-leaderboard">
+
+    <template>
+
+        <h1>Leaderboard</h1>
+
+        <firebase-query
+            app-name="fss-data"
+            path="/users-public"
+            data="{{userData}}">
+        </firebase-query>
+
+    </template>
+    <script>
+     Polymer({
+         is: 'fd-leaderboard',
+
+         properties: {
+             'userData': {
+                 type: Object,
+                 observer: '_dataChanged',
+             },
+         },
+
+         observers: [
+             '_dataChanged(liveData)'
+         ],
+
+         _dataChanged: function (liveData) {
+             console.log("[Leaderboard] data changed: ", liveData);
+         }
+     });
+    </script>
+
+</dom-module>

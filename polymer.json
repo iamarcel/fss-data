@@ -2,6 +2,7 @@
   "entrypoint": "index.html",
   "shell": "src/fd-app.html",
   "fragments": [
-    "src/fd-list.html"
+      "src/fd-list.html",
+      "src/fd-leaderboard.html"
   ]
 }

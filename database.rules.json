@@ -2,5 +2,11 @@
     "theorems": {
         ".read": true,
         ".write": "auth != null"
+    },
+    "users-public": {
+        ".read": "auth != null",
+        "$uid": {
+            ".write": "$uid === auth.uid"
+        }
     }
 }
