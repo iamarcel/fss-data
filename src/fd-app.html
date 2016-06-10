@@ -43,45 +43,6 @@
 
         <style include="fd-styles"></style>
 
-        <!--
-        <style>
-
-         :host {
-             display: block;
-             --app-primary-color: #4285f4;
-             --app-secondary-color: black;
-         }
-
-         app-header {
-             background-color: var(--app-primary-color);
-             color: #fff;
-         }
-         app-header paper-icon-button {
-             --paper-icon-button-ink-color: white;
-         }
-
-         .drawer-list {
-             margin: 0 20px;
-         }
-         .drawer-list a {
-             display: block;
-             padding: 0 16px;
-             line-height: 40px;
-             text-decoration: none;
-             color: var(--app-secondary-color);
-         }
-         .drawer-list a.iron-selected {
-             color: black;
-             font-weight: bold;
-         }
-         .drawer-list a.subroute {
-             padding-left: 32px;
-         }
-
-
-        </style>
-        -->
-
         <style>
 
          :host {
@@ -147,15 +108,6 @@
                     <paper-item on-tap="routeTo" to-page="list">
                         Stellingen
                     </paper-item>
-                    <paper-item on-tap="routeTo" to-page="view1">
-                        View 1
-                    </paper-item>
-                    <paper-item on-tap="routeTo" to-page="view2">
-                        View 2
-                    </paper-item>
-                    <paper-item on-tap="routeTo" to-page="view3">
-                        View 3
-                    </paper-item>
                 </paper-menu>
                 <template is="dom-if" if="[[!user]]">
                     <div class="text-center">
@@ -182,9 +134,6 @@
 
                 <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
                     <fd-list name="list" user="[[user]]"></fd-list>
-                    <fd-view1 name="view1"></fd-view1>
-                    <fd-view2 name="view2"></fd-view2>
-                    <fd-view3 name="view3"></fd-view3>
                 </iron-pages>
 
             </app-header-layout>
