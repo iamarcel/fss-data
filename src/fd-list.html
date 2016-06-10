@@ -140,6 +140,7 @@
 
              /* this.push('data', newTheorem);*/
              firebase.app('fss-data').database().ref('/theorems').push(newTheorem);
+             this.set('query', '');
          },
 
          addUse: function (event) {
