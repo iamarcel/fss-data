@@ -145,7 +145,7 @@
 
          addUse: function (event) {
              var model = event.model;
-             model.set('item.uses', model.item.uses + 1);
+             model.set('item.uses', model.item.uses ? model.item.uses + 1 : 1);
              this.notifyPath('data', this.data);
          },
 
