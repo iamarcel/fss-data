@@ -1,0 +1,211 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/app-storage/app-indexeddb-mirror/app-indexeddb-mirror.html">
+<link rel="import" href="../bower_components/iron-input/iron-input.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-item/paper-item.html">
+<link rel="import" href="../bower_components/paper-input/paper-input-container.html">
+
+<link rel="import" href="../bower_components/polymerfire/polymerfire.html">
+
+<link rel="import" href="fd-theorem.html">
+<link rel="import" href="fd-theorem-form.html">
+
+<script src="../bower_components/fuzzy/fuzzy-min.js"></script>
+
+<dom-module id="fd-list">
+
+    <template>
+        <style>
+         :host {
+             display: block;
+             padding: 20px;
+         }
+
+         .add-theorem {
+             width: 100%;
+         }
+
+         paper-card, fd-theorem-form, #search {
+             margin-bottom: 20px;
+             display: block;
+         }
+
+         #search {
+             box-sizing: border-box;
+             width: 100%;
+             padding: 8px 16px;
+             margin: 0;
+             outline: none;
+             border: 0;
+             border-radius: 2px;
+             @apply(--paper-font-subhead);
+
+             /* @apply(--shadow-elevation-2dp);
+                background: #fff; */
+         }
+
+         #search paper-input-container {
+             --paper-input-container: {}
+         }
+
+         fd-theorem {
+             padding: 10px 16px;
+         }
+
+         #theorem-list > *:not(:last-child) {
+             border-bottom: 1px solid #ddd;
+         }
+        </style>
+
+        <h1>Stellingen</h1>
+
+        <firebase-query
+            app-name="fss-data"
+            path="/theorems"
+            data="{{liveData}}">
+        </firebase-query>
+        <app-indexeddb-mirror
+            session="[[user.uid]]"
+            key="theorems"
+            data="{{liveData}}"
+            persisted-data="{{data}}">
+        </app-indexeddb-mirror>
+
+        <paper-card id="theorem-list">
+            <input id="search" is="iron-input" bind-value="{{query}}" placeholder="🔎 Zoeken" />
+            <template is="dom-repeat" items="{{data}}" as="item" filter="{{theoremFilter(query)}}" sort="{{theoremSorter(query)}}" observe="name.short name.full formula uses">
+                <fd-theorem theorem="[[item]]" on-add-use-clicked="addUse"></fd-theorem>
+            </template>
+        </paper-card>
+
+        <template is="dom-if" if="[[user]]">
+            <fd-theorem-form id="add-theorem-form" on-save="addTheorem"></fd-theorem-form>
+        </template>
+
+    </template>
+
+    <script>
+     Polymer({
+         is: 'fd-list',
+         properties: {
+             data: {
+                 type: Array,
+                 notify: true,
+                 value: [
+                     /* {
+                      *     formula: "(x\\implies y\\implies z)\\implies y\\implies x\\implies z",
+                      *     name: {
+                      *         short: "S\\implies",
+                      *         full: "Shunting"
+                      *     },
+                      *     tags: ["implicatie", "3-elementen"],
+                      *     uses: 0
+                      * },
+                      * {
+                      *     formula: "x \\implies y \\implies x",
+                      *     name: {
+                      *         short: "W \\implies",
+                      *         full: "Weakening"
+                      *     },
+                      *     tags: ["implicatie", "2-elementen", "verzwakking"],
+                      *     uses: 0
+                      * },*/
+                 ]
+             },
+
+             user: {
+                 type: Object,
+                 value: null
+             }
+
+         },
+
+         query: '',
+
+         observers: [
+             '_dataChanged(data)'
+         ],
+
+         _dataChanged: function (data) {
+             // console.log(data);
+         },
+
+         addTheorem: function (event) {
+             var newTheorem = event.detail;
+             newTheorem.created_by = this.user.uid;
+             newTheorem.created_at = Date.now();
+
+             /* this.push('data', newTheorem);*/
+             firebase.app('fss-data').database().ref('/theorems').push(newTheorem);
+         },
+
+         addUse: function (event) {
+             var model = event.model;
+             model.set('item.uses', model.item.uses + 1);
+             this.notifyPath('data', this.data);
+         },
+
+         theoremFilter: function (query) {
+             if (!query) {
+                 return null;
+             } else {
+                 var query = query.toLowerCase();
+                 return function (item) {
+                     return [item.name.short,
+                             item.name.full,
+                             item.formula].concat(item.tags)
+                                          .reduce(function (found, field) {
+                                              return found || fuzzy.test(query, field);
+                                          }, false);
+                 }
+             }
+
+         },
+
+         theoremSorter: function (query) {
+             if (!query) {
+                 return function (a, b) {
+                     // Sort by popularity by default
+                     return b.uses - a.uses;
+                 };
+             } else {
+                 var query = query.toLowerCase();
+
+                 return function (a, b) {
+                     var bal = 0;
+
+                     var weighter = function (value) {
+                         return function (curr, tag) {
+                             if (tag.toLowerCase() == query) {
+                                 curr += 5 * value;
+                             } else if (tag.toLowerCase().indexOf(query) != -1) {
+                                 curr += value;
+                             }
+
+                             return curr;
+                         };
+                     };
+
+                     bal -= [a.name.short, a.name.full].reduce(weighter(10), 0);
+                     bal += [b.name.short, b.name.full].reduce(weighter(10), 0);
+
+                     bal -= a.tags.reduce(weighter(2), 0);
+                     bal += b.tags.reduce(weighter(2), 0);
+
+                     bal += b.uses - a.uses;
+
+                     return bal;
+                 };
+             }
+         },
+
+         canAdd: function (user) {
+             console.log(user);
+         }
+     })
+    </script>
+
+</dom-module>

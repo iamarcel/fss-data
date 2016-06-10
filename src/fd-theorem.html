@@ -1,0 +1,110 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/iron-icon/iron-icon.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-icons/social-icons.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-ripple/paper-ripple.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="fd-math.html">
+
+<dom-module id="fd-theorem">
+
+    <template>
+
+        <style include="iron-flex iron-flex-alignment"></style>
+        <style>
+         :host {
+             display: block;
+             position: relative;
+             min-height: 24px;
+         }
+
+         .full-name {
+             @apply(--paper-font-title);
+         }
+
+         .short-name {
+             color: #666;
+         }
+
+         .details {
+             font-size: .75em;
+             color: #999;
+         }
+
+         .details iron-icon {
+             --iron-icon-height: .75em;
+             --iron-icon-width: .75em;
+             padding-right: .3em;
+         }
+
+         paper-ripple {
+             color: #eee;
+         }
+        </style>
+
+        <div class="layout vertical">
+            <iron-collapse opened="[[expanded]]">
+                <span class="full-name" id="details-top">[[theorem.name.full]]</span>
+            </iron-collapse>
+            <div class="layout horizontal center">
+                <div class="flex">
+                    <span class="short-name">
+                        ⟨<fd-math tex="[[theorem.name.short]]"></fd-math>⟩
+                    </span>
+                    <fd-math tex="[[theorem.formula]]"></fd-math>
+                </div>
+                <div class="uses">
+                    <span>[[theorem.uses]]</span>
+                    <paper-icon-button icon="social:plus-one" on-tap="addUse"></paper-icon-button>
+                </div>
+            </div>
+            <iron-collapse opened="[[expanded]]">
+                <div class="details" id="details-bottom">
+                    <span class="tags"><iron-icon icon="label"></iron-icon>[[_arrayJoin(theorem.tags)]]</span>
+                </div>
+            </iron-collapse>
+            <paper-ripple></paper-ripple>
+        </div>
+    </template>
+
+    <script>
+     Polymer({
+         is: 'fd-theorem',
+
+         properties: {
+             theorem: {
+                 type: Object,
+                 notify: true,
+             },
+             expanded: {
+                 type: Boolean,
+                 value: false,
+             },
+         },
+
+         listeners: {
+             'tap': 'toggleExpanded',
+         },
+
+         _arrayJoin: function (arr) {
+             return arr ? arr.join(', ') : '';
+         },
+
+         toggleExpanded: function (event) {
+             this.expanded = !this.expanded;
+         },
+
+         addUse: function (event) {
+             this.fire('add-use-clicked', this.theorem);
+             event.cancelBubble = true;
+             event.stopPropagation();
+         },
+     });
+    </script>
+
+</dom-module>

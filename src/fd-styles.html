@@ -1,0 +1,53 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/paper-styles/shadow.html">
+<link rel="import" href="../bower_components/paper-styles/color.html">
+<link rel="import" href="../bower_components/paper-styles/typography.html">
+<link rel="import" href="../bower_components/paper-styles/default-theme.html">
+
+<dom-module id="fd-styles">
+
+    <template>
+
+        <style>
+
+         paper-button {
+             @apply(--paper-font-button);
+         }
+
+         paper-button:not([raised]).primary {
+             color: var(--dark-accent-color);
+         }
+
+         paper-button[raised].primary {
+             background-color: var(--accent-color);
+             color: var(--dark-theme-text-color);
+         }
+
+         .text-center {
+             text-align: center;
+         }
+
+         .text-right {
+             text-align: right;
+         }
+
+         .subtle {
+             text-decoration: none;
+             color: #999;
+             font-size: .75em;
+         }
+
+         .avatar {
+             display: inline-block;
+             box-sizing: border-box;
+             width: 40px;
+             height: 40px;
+             border-radius: 50%;
+         }
+
+        </style>
+
+    </template>
+
+</dom-module>

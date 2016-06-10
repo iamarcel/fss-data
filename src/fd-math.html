@@ -1,0 +1,46 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="fd-math-styles.html">
+
+<script src="../bower_components/katex/dist/katex.min.js"></script>
+
+<dom-module id="fd-math">
+
+    <template>
+        <style include="fd-math-styles"></style>
+        <span id="katex-out"></span>
+    </template>
+
+    <script>
+     Polymer({
+         is: 'fd-math',
+         properties: {
+             tex: {
+                 type: String,
+                 observer: '_texChanged',
+                 notify: true
+             }
+         },
+
+         lastValidString: "",
+
+         _texChanged: function (newValue, oldValue) {
+             try {
+                 katex.render(this._fixTexTokens(newValue), this.$['katex-out']);
+                 this.lastValidString = newValue;
+             } catch (e) {
+                 if (e instanceof katex.ParseError) {
+                     katex.render(this._fixTexTokens(this.lastValidString), this.$['katex-out']);
+                 } else {
+                     throw e;
+                 }
+             }
+         },
+
+         _fixTexTokens: function (str) {
+             return str.replace(/\\implies/g, "\\Rightarrow");
+         }
+     });
+    </script>
+
+</dom-module>

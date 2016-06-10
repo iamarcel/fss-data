@@ -5,10 +5,10 @@
   "hosting": {
     "public": "build/bundled",
     "rewrites": [
-      {
-        "source": "**/!{*.*}",
-        "destination": "/index.html"
-      }
+        {
+            "source": "!{__}/!{*.*}",
+            "destination": "/index.html"
+        }
     ]
   }
 }

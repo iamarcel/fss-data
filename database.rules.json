@@ -1,4 +1,6 @@
 {
-  ".read": true,
-  ".write": true
+    "theorems": {
+        ".read": true,
+        ".write": "auth != null"
+    }
 }

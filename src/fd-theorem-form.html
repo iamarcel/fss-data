@@ -1,0 +1,112 @@
+<link rel="import" href="../bower_components/polymer/polymer.html">
+
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
+<link rel="import" href="../bower_components/iron-flex-layout/iron-flex-layout-classes.html">
+<link rel="import" href="../bower_components/paper-card/paper-card.html">
+<link rel="import" href="../bower_components/paper-input/paper-input.html">
+<link rel="import" href="../bower_components/paper-button/paper-button.html">
+<link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+
+<link rel="import" href="fd-styles.html">
+<link rel="import" href="fd-theorem.html">
+
+<dom-module id="fd-theorem-form">
+
+    <template>
+        <style include="fd-styles"></style>
+        <style include="iron-flex iron-flex-alignment"></style>
+        <style>
+
+         .layout.horizontal > *:not(:first-child) {
+             padding-left: 10px;
+         }
+
+         div {
+             box-sizing: border-box;
+         }
+
+         paper-card {
+             display: block;
+         }
+
+        </style>
+
+        <paper-card heading="Stelling toevoegen" class="add-theorem">
+            <div class="card-content">
+                <div class="layout vertical">
+                    <div class="layout horizontal">
+                        <paper-input id="short-name" label="Naam (kort)" value="{{theorem.name.short}}">
+                            <div prefix>⟨</div>
+                            <div suffix>⟩</div>
+                        </paper-input>
+                        <paper-input id="full-name" label="Volledige naam" class="flex" value="{{theorem.name.full}}" required></paper-input>
+                    </div>
+                    <paper-input id="theorem" label="Stelling" value="{{theorem.formula}}" required></paper-input>
+                    <paper-input id="tags" label="Tags (komma-gescheiden)" value="{{tagString}}" required></paper-input>
+                    <fd-theorem theorem="[[theorem]]" expanded="true"></fd-theorem>
+                </div>
+            </div>
+            <div class="card-actions">
+                <paper-button id="save-button" class="primary">Opslaan</paper-button>
+            </div>
+        </paper-card>
+    </template>
+
+    <script>
+     Polymer({
+         is: 'fd-theorem-form',
+         properties: {
+             theorem: {
+                 type: Object,
+                 value: {
+                     name: {
+                         short: "",
+                         full: ""
+                     },
+                     formula: "",
+                     tags: [],
+                     uses: 0,
+                 },
+             },
+         },
+
+         listeners: {
+             'save-button.tap': 'notifySave',
+         },
+
+         observers: [
+             '_updateTags(tagString)'
+         ],
+
+         notifySave: function (event) {
+             var inputNames = [
+                 'short-name',
+                 'full-name',
+                 'theorem',
+                 'tags'
+             ];
+             console.log(inputNames);
+
+             var valid = true;
+             for (var name of inputNames) {
+                 var input = this.$[name];
+
+                 // First input.validate() to force all inputs to show
+                 // their invalid state
+                 valid = input.validate() && valid;
+             }
+
+             if (!valid) return;
+
+             this.fire('save', this.theorem);
+             this.set('theorem', {name:{short:"",full:""},formula:""});
+             this.set('tagString', '');
+         },
+
+         _updateTags: function (tagString) {
+             this.set('theorem.tags', tagString.split(/[\s,]+/));
+         },
+     });
+    </script>
+
+</dom-module>
