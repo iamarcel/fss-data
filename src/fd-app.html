@@ -16,6 +16,7 @@
 <link rel="import" href="../bower_components/app-layout/app-header/app-header.html">
 <link rel="import" href="../bower_components/app-layout/app-header-layout/app-header-layout.html">
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
+<link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
@@ -80,7 +81,9 @@
         <firebase-document
             id="firebase-publicdata"
             app-name="fss-data"
-            path="/users-public/{{user.uid}}"
+            ref="{{fbref}}"
+            log="true"
+            path="/users-public/[[user.uid]]"
             data="{{myPublicData}}">
         </firebase-document>
 
@@ -91,7 +94,7 @@
             data="{{routeData}}"
             tail="{{routeTail}}"></app-route>
 
-        <app-drawer-layout fullbleed>
+        <app-drawer-layout fullbleed responsive-width="940px">
 
             <!-- Drawer content -->
             <app-drawer>
@@ -131,15 +134,18 @@
             <!-- Main content -->
             <app-header-layout has-scrolling-region>
 
-                <app-header condenses reveals effects="waterfall">
-                    <app-toolbar>
+                <app-header reveals effects="material">
+                    <app-toolbar primary>
                         <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-                        <div title>FSS Data</div>
+                        <div>FSS Data</div>
+                    </app-toolbar>
+                    <app-toolbar>
+                        <div title>{{pageTitle(page)}}</div>
                     </app-toolbar>
                 </app-header>
 
                 <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-                    <fd-list name="list" user="[[user]]" user-public="{{myPublicData}}"></fd-list>
+                    <fd-list name="list" user="[[user]]" on-theorem-added="addContribution"></fd-list>
                     <fd-leaderboard name="leaderboard"></fd-list>
                 </iron-pages>
 
@@ -169,8 +175,12 @@
 
          observers: [
              '_routePageChanged(routeData.page)',
-             '_userChanged(user)',
+             '_userChanged(user)'
          ],
+
+         listeners: {
+             'theorem-added': 'addContribution'
+         },
 
          _routePageChanged: function(page) {
              this.page = page || 'list';
@@ -186,25 +196,46 @@
              console.log(data);
          },
 
-         _userChanged: function (user) {
-             if (this.signedIn && user) {
+         _userChanged: function () {
+             if (this.signedIn && this.user) {
                  // Update my public data
-                 if (!this.myPublicData) {
-                     this.myPublicData = {};
-                 }
-                 this.set('myPublicData.name', user.displayName);
-                 this.set('myPublicData.photoURL', user.photoURL);
-                 if (!this.myPublicData.contributions) {
-                     this.set('myPublicData.contributions', 0);
-                 }
+                 if (this.$['firebase-publicdata'].isNew || Object.keys(this.myPublicData).length == 0) {
+                     this.myPublicData  = {
+                         name: this.user.displayName,
+                         photoURL: this.user.photoURL,
+                         contributions: 0,
+                     };
 
-                 this.$['firebase-publicdata'].save('/users-public', user.uid);
+                     this.$['firebase-publicdata'].save('/users-public', this.user.uid);
+                     console.log('created new public data');
+                 } else {
+                     this.set('myPublicData.name', this.user.displayName);
+                     this.set('myPublicData.photoURL', this.user.photoURL);
+                     if (!this.myPublicData.contributions) {
+                         this.set('myPublicData.contributions', 0);
+                     }
+                     // this.$['firebase-publicdata'].save('/users-public', this.user.uid);
+                     console.log('updated public data');
+                 }
              }
+         },
+
+         addContribution: function (event) {
+             this.set('myPublicData.contributions',
+                      this.myPublicData.contributions ? this.myPublicData.contributions + 1
+                    : 1);
          },
 
          routeTo: function (event) {
              var page = event.currentTarget.getAttribute('to-page');
              this.page = page || 'list';
+         },
+
+         pageTitle: function (name) {
+             return ({
+                 'list': 'Stellingen',
+                 'leaderboard': 'Leaderboard'
+             })[name];
          },
 
          onFirebaseError: function (event) {
