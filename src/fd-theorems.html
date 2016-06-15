@@ -66,9 +66,9 @@
             data="{{liveData}}">
         </firebase-query>
         <app-indexeddb-mirror
-            key="theorems"
-            data="{{liveData}}"
-            persisted-data="{{data}}">
+            key="theorem-list"
+            data="[[liveData]]"
+            persisted-data="{{persistedData}}">
         </app-indexeddb-mirror>
 
         <template is="dom-if" if="{{addVisible(addToggled, user)}}">
@@ -77,7 +77,7 @@
 
         <paper-card id="theorem-list">
             <input id="search" is="iron-input" bind-value="{{query}}" placeholder="🔎 Zoeken" />
-            <template is="dom-repeat" items="{{data}}" as="item" filter="{{theoremFilter(query)}}" sort="{{theoremSorter(query)}}" observe="name.short name.full formula uses">
+            <template is="dom-repeat" items="{{persistedData}}" as="item" filter="{{theoremFilter(query)}}" sort="{{theoremSorter(query)}}" observe="name.short name.full formula uses">
                 <fd-theorem theorem="[[item]]" on-add-use-clicked="addUse"></fd-theorem>
             </template>
         </paper-card>
@@ -88,30 +88,6 @@
      Polymer({
          is: 'fd-theorems',
          properties: {
-             data: {
-                 type: Array,
-                 notify: true,
-                 value: [
-                     /* {
-                      *     formula: "(x\\implies y\\implies z)\\implies y\\implies x\\implies z",
-                      *     name: {
-                      *         short: "S\\implies",
-                      *         full: "Shunting"
-                      *     },
-                      *     tags: ["implicatie", "3-elementen"],
-                      *     uses: 0
-                      * },
-                      * {
-                      *     formula: "x \\implies y \\implies x",
-                      *     name: {
-                      *         short: "W \\implies",
-                      *         full: "Weakening"
-                      *     },
-                      *     tags: ["implicatie", "2-elementen", "verzwakking"],
-                      *     uses: 0
-                      * },*/
-                 ]
-             },
 
              user: {
                  type: Object,
@@ -128,7 +104,7 @@
          query: '',
 
          observers: [
-             '_dataChanged(data)'
+             '_dataChanged(persistedData)'
          ],
 
          listeners: {
@@ -167,7 +143,7 @@
          addUse: function (event) {
              var model = event.model;
              model.set('item.uses', model.item.uses ? model.item.uses + 1 : 1);
-             this.notifyPath('data', this.data);
+             this.notifyPath('persistedData', this.persistedData);
          },
 
          theoremFilter: function (query) {

@@ -78,14 +78,14 @@
             on-login="onFirebaseLogin">
         </firebase-auth>
 
-        <firebase-document
-            id="firebase-publicdata"
-            app-name="fss-data"
-            ref="{{fbref}}"
-            log="true"
-            path="/users-public/[[user.uid]]"
-            data="{{myPublicData}}">
-        </firebase-document>
+        <!-- <firebase-document
+             id="firebase-publicdata"
+             app-name="fss-data"
+             ref="{{fbref}}"
+             log="true"
+             path="/users-public/[[user.uid]]"
+             data="{{myPublicData}}">
+             </firebase-document> -->
 
         <app-location route="{{route}}"></app-location>
         <app-route
@@ -196,6 +196,7 @@
          },
 
          _userChanged: function () {
+             return;
              if (this.signedIn && this.user) {
                  // Update my public data
                  if (this.$['firebase-publicdata'].isNew || Object.keys(this.myPublicData).length == 0) {
