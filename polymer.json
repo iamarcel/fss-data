@@ -2,7 +2,12 @@
   "entrypoint": "index.html",
   "shell": "src/fd-app.html",
   "fragments": [
-      "src/fd-list.html",
-      "src/fd-leaderboard.html"
+      "src/fd-leaderboard.html",
+      "src/fd-math-styles.html",
+      "src/fd-math.html",
+      "src/fd-styles.html",
+      "src/fd-theorem-form.html",
+      "src/fd-theorem.html",
+      "src/fd-theorems.html"
   ]
 }

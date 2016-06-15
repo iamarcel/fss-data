@@ -18,6 +18,7 @@
 <link rel="import" href="../bower_components/app-layout/app-toolbar/app-toolbar.html">
 <link rel="import" href="../bower_components/app-layout/app-scroll-effects/app-scroll-effects.html">
 <link rel="import" href="../bower_components/paper-icon-button/paper-icon-button.html">
+<link rel="import" href="../bower_components/iron-icons/iron-icons.html">
 <link rel="import" href="../bower_components/iron-pages/iron-pages.html">
 <link rel="import" href="../bower_components/iron-collapse/iron-collapse.html">
 <link rel="import" href="../bower_components/iron-selector/iron-selector.html">
@@ -36,7 +37,6 @@
 
 
 <link rel="import" href="fd-styles.html">
-<link rel="import" href="fd-icons.html">
 
 <dom-module id="fd-app">
 
@@ -87,19 +87,20 @@
             data="{{myPublicData}}">
         </firebase-document>
 
-        <app-location route="{{route}}" url-space-regex="!(^/__)"></app-location>
+        <app-location route="{{route}}"></app-location>
         <app-route
             route="{{route}}"
             pattern="/:page"
             data="{{routeData}}"
-            tail="{{routeTail}}"></app-route>
+            tail="{{routeTail}}">
+        </app-route>
 
         <app-drawer-layout fullbleed responsive-width="940px">
 
             <!-- Drawer content -->
             <app-drawer>
                 <app-toolbar>
-                    <div title>Menu</div>
+                    <div>FSS Data</div>
                 </app-toolbar>
 
                 <iron-collapse opened="[[user]]">
@@ -108,14 +109,12 @@
                         <paper-item-body two-line>
                             <div>[[user.displayName]]</div>
                             <div secondary>[[user.email]]</div>
-                            <div secondary class="text-right">
-                            </div>
                         </paper-item-body>
                     </paper-icon-item>
                 </iron-collapse>
 
                 <paper-menu selected="[[page]]" attr-for-selected="to-page" class="drawer-list" role="navigation">
-                    <paper-item on-tap="routeTo" to-page="list">Stellingen</paper-item>
+                    <paper-item on-tap="routeTo" to-page="theorems">Stellingen</paper-item>
                     <paper-item on-tap="routeTo" to-page="leaderboard">Leaderboard</paper-item>
                 </paper-menu>
                 <template is="dom-if" if="[[!user]]">
@@ -134,19 +133,19 @@
             <!-- Main content -->
             <app-header-layout has-scrolling-region>
 
-                <app-header reveals effects="material">
-                    <app-toolbar primary>
-                        <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
-                        <div>FSS Data</div>
-                    </app-toolbar>
+                <app-header reveals>
                     <app-toolbar>
+                        <paper-icon-button icon="menu" drawer-toggle></paper-icon-button>
                         <div title>{{pageTitle(page)}}</div>
+                        <template is="dom-if" if="{{showAdd(page)}}">
+                            <paper-icon-button icon="add" on-tap="tapAdd"></paper-icon-button>
+                        </template>
                     </app-toolbar>
                 </app-header>
 
-                <iron-pages role="main" selected="[[page]]" attr-for-selected="name">
-                    <fd-list name="list" user="[[user]]" on-theorem-added="addContribution"></fd-list>
-                    <fd-leaderboard name="leaderboard"></fd-list>
+                <iron-pages id="main-pages" role="main" selected="[[page]]" attr-for-selected="name">
+                    <fd-theorems name="theorems" user="[[user]]" on-theorem-added="addContribution"></fd-theorems>
+                    <fd-leaderboard name="leaderboard"></fd-leaderboard>
                 </iron-pages>
 
             </app-header-layout>
@@ -183,7 +182,7 @@
          },
 
          _routePageChanged: function(page) {
-             this.page = page || 'list';
+             this.page = page || 'theorems';
          },
 
          _pageChanged: function(page) {
@@ -228,12 +227,12 @@
 
          routeTo: function (event) {
              var page = event.currentTarget.getAttribute('to-page');
-             this.page = page || 'list';
+             this.page = page || 'theorems';
          },
 
          pageTitle: function (name) {
              return ({
-                 'list': 'Stellingen',
+                 'theorems': 'Stellingen',
                  'leaderboard': 'Leaderboard'
              })[name];
          },
@@ -254,6 +253,14 @@
 
          doLogout: function () {
              this.$['firebase-login'].signOut();
+         },
+
+         showAdd: function (page) {
+             return page === 'theorems';
+         },
+
+         tapAdd: function (event) {
+             this.$['main-pages'].selectedItem.fire('tap-add');
          },
 
      });
